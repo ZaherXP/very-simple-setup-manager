@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SETUP — Item Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #141414;
+      --surface2: #1c1c1c;
+      --border: #2a2a2a;
+      --accent: #e8a020;
+      --accent2: #c47a10;
+      --text: #e8e4dc;
+      --muted: #666;
+      --danger: #c0392b;
+      --green: #27ae60;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.12em;
+      color: var(--text);
+    }
+
+    .logo-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid var(--accent);
+      padding: 2px 8px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 32px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .stat-value {
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* LAYOUT */
+    .container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: calc(100vh - 72px);
+    }
+
+    /* SIDEBAR FORM */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 36px 32px;
+      position: sticky;
+      top: 72px;
+      height: calc(100vh - 72px);
+      overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .form-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .form-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 32px;
+      letter-spacing: 0.05em;
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.875rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      border-radius: 0;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      background: #1f1f1f;
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+
+    select option { background: var(--surface2); }
+
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .cat-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+    .cat-icon { font-size: 1rem; display: block; margin-bottom: 4px; }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      padding: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .submit-btn:hover { background: var(--accent2); }
+    .submit-btn:active { transform: scale(0.98); }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      padding: 36px 40px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-tab:hover { color: var(--text); border-color: #444; }
+    .filter-tab.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+    }
+
+    .view-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .view-btn.active { border-color: var(--accent); color: var(--accent); }
+
+    /* GRID VIEW */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    /* LIST VIEW */
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ITEM CARD */
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      animation: fadeSlide 0.25s ease forwards;
+      transition: border-color 0.2s;
+    }
+
+    .item-card:hover { border-color: #3a3a3a; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-accent-bar {
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .card-body { padding: 18px 20px; }
+
+    .card-category {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+      line-height: 1.1;
+    }
+
+    .card-brand {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+      background: var(--surface2);
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .card-image-placeholder {
+      width: 100%;
+      height: 120px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .card-notes {
+      font-size: 0.78rem;
+      color: #999;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-price {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .card-price.free { color: var(--green); font-size: 0.8rem; }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: 'IBM Plex Mono', monospace;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover { color: var(--text); border-color: #555; }
+    .action-btn.delete:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* LIST ITEM */
+    .item-list-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: 24px 1fr auto auto auto;
+      align-items: center;
+      gap: 20px;
+      animation: fadeSlide 0.2s ease forwards;
+      transition: border-color 0.15s;
+    }
+
+    .item-list-row:hover { border-color: #3a3a3a; }
+
+    .list-icon { font-size: 1.2rem; }
+
+    .list-info { display: flex; flex-direction: column; gap: 2px; }
+
+    .list-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .list-brand {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .list-cat {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .list-price {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .list-actions { display: flex; gap: 6px; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .empty-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.1em;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    .empty-sub {
+      font-size: 0.8rem;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    /* RATING STARS */
+    .star-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .star {
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.1s;
+    }
+
+    .star.lit { color: var(--accent); }
+    .star:hover { color: var(--accent); }
+
+    .rating-display {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+
+    .rating-star { font-size: 0.75rem; color: var(--border); }
+    .rating-star.lit { color: var(--accent); }
+
+    /* SECTION LABEL */
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* TOTAL BAR */
+    .total-bar {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .total-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .total-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 480px;
+      max-width: 90vw;
+      padding: 32px;
+      animation: fadeSlide 0.2s ease;
+    }
+
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-ghost:hover { border-color: #555; }
+
+    .btn-danger {
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-danger:hover { opacity: 0.85; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      padding: 12px 20px;
+      z-index: 300;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* IMAGE PREVIEW */
+    .img-preview {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      margin-top: 8px;
+      display: none;
+    }
+
+    .img-preview.visible { display: block; }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .header-stats { display: none; }
+      header { padding: 0 20px; }
+      .main { padding: 24px 20px; }
+      .sidebar { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-text">SETUP</span>
+    <span class="logo-tag">Item Manager</span>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <span class="stat-value" id="total-items">0</span>
+      <span class="stat-label">Items</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="total-cost">$0</span>
+      <span class="stat-label">Total Value</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="total-cats">0</span>
+      <span class="stat-label">Categories</span>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="form-title">Add New Item</div>
+    <div class="form-subtitle">// catalog your setup</div>
+
+    <div class="field-group">
+      <label>Category</label>
+      <div class="category-grid" id="cat-grid">
+        <button class="cat-btn active" data-cat="Display" onclick="selectCat(this)">
+          <span class="cat-icon">🖥️</span>Display
+        </button>
+        <button class="cat-btn" data-cat="Computing" onclick="selectCat(this)">
+          <span class="cat-icon">⚡</span>Computing
+        </button>
+        <button class="cat-btn" data-cat="Peripherals" onclick="selectCat(this)">
+          <span class="cat-icon">⌨️</span>Peripherals
+        </button>
+        <button class="cat-btn" data-cat="Audio" onclick="selectCat(this)">
+          <span class="cat-icon">🎧</span>Audio
+        </button>
+        <button class="cat-btn" data-cat="Furniture" onclick="selectCat(this)">
+          <span class="cat-icon">🪑</span>Furniture
+        </button>
+        <button class="cat-btn" data-cat="Lighting" onclick="selectCat(this)">
+          <span class="cat-icon">💡</span>Lighting
+        </button>
+        <button class="cat-btn" data-cat="Networking" onclick="selectCat(this)">
+          <span class="cat-icon">📡</span>Network
+        </button>
+        <button class="cat-btn" data-cat="Storage" onclick="selectCat(this)">
+          <span class="cat-icon">💾</span>Storage
+        </button>
+        <button class="cat-btn" data-cat="Other" onclick="selectCat(this)">
+          <span class="cat-icon">📦</span>Other
+        </button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Item Name *</label>
+      <input type="text" id="item-name" placeholder="e.g. LG UltraWide 34"" />
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>Brand</label>
+        <input type="text" id="item-brand" placeholder="e.g. LG" />
+      </div>
+      <div class="field-group">
+        <label>Price ($)</label>
+        <input type="number" id="item-price" placeholder="0.00" min="0" step="0.01" />
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Image URL</label>
+      <input type="url" id="item-img" placeholder="https://..." oninput="previewImg(this.value)" />
+      <img id="img-preview" class="img-preview" alt="preview" />
+    </div>
+
+    <div class="field-group">
+      <label>Rating</label>
+      <div class="star-row" id="star-row">
+        <span class="star" data-v="1" onclick="setRating(1)">★</span>
+        <span class="star" data-v="2" onclick="setRating(2)">★</span>
+        <span class="star" data-v="3" onclick="setRating(3)">★</span>
+        <span class="star" data-v="4" onclick="setRating(4)">★</span>
+        <span class="star" data-v="5" onclick="setRating(5)">★</span>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Notes / Description</label>
+      <textarea id="item-notes" placeholder="Any details, specs, or thoughts..."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="addItem()">+ Add to Setup</button>
+
+    <hr class="divider" />
+
+    <div class="section-label">Quick Stats</div>
+    <div id="cat-breakdown" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="toolbar">
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-filter="All" onclick="setFilter('All', this)">All</button>
+        <button class="filter-tab" data-filter="Display" onclick="setFilter('Display', this)">Display</button>
+        <button class="filter-tab" data-filter="Computing" onclick="setFilter('Computing', this)">Computing</button>
+        <button class="filter-tab" data-filter="Peripherals" onclick="setFilter('Peripherals', this)">Peripherals</button>
+        <button class="filter-tab" data-filter="Audio" onclick="setFilter('Audio', this)">Audio</button>
+        <button class="filter-tab" data-filter="Furniture" onclick="setFilter('Furniture', this)">Furniture</button>
+        <button class="filter-tab" data-filter="Lighting" onclick="setFilter('Lighting', this)">Lighting</button>
+        <button class="filter-tab" data-filter="Networking" onclick="setFilter('Networking', this)">Network</button>
+        <button class="filter-tab" data-filter="Storage" onclick="setFilter('Storage', this)">Storage</button>
+        <button class="filter-tab" data-filter="Other" onclick="setFilter('Other', this)">Other</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-grid" onclick="setView('grid')" title="Grid">⊞</button>
+        <button class="view-btn" id="view-list" onclick="setView('list')" title="List">☰</button>
+      </div>
+    </div>
+
+    <div id="items-container" class="items-grid"></div>
+
+    <div class="total-bar" id="total-bar" style="display:none;">
+      <span class="total-label">Setup Total</span>
+      <span class="total-value" id="total-display">$0</span>
+    </div>
+  </main>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-title">Remove Item</div>
+    <p style="font-size:0.85rem;color:#999;line-height:1.6;">
+      Are you sure you want to remove <strong id="delete-name" style="color:var(--text)"></strong> from your setup? This cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const ICONS = {
+    Display: '🖥️', Computing: '⚡', Peripherals: '⌨️',
+    Audio: '🎧', Furniture: '🪑', Lighting: '💡',
+    Networking: '📡', Storage: '💾', Other: '📦'
+  };
+
+  let items = JSON.parse(localStorage.getItem('setup-items') || '[]');
+  let selectedCat = 'Display';
+  let selectedRating = 0;
+  let currentFilter = 'All';
+  let currentView = 'grid';
+  let deleteTarget = null;
+
+  function save() {
+    localStorage.setItem('setup-items', JSON.stringify(items));
+  }
+
+  function selectCat(btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedCat = btn.dataset.cat;
+  }
+
+  function setRating(n) {
+    selectedRating = n;
+    document.querySelectorAll('#star-row .star').forEach((s, i) => {
+      s.classList.toggle('lit', i < n);
+    });
+  }
+
+  function previewImg(url) {
+    const p = document.getElementById('img-preview');
+    if (url && url.startsWith('http')) {
+      p.src = url;
+      p.classList.add('visible');
+    } else {
+      p.classList.remove('visible');
+    }
+  }
+
+  function addItem() {
+    const name = document.getElementById('item-name').value.trim();
+    if (!name) { showToast('Item name is required'); return; }
+
+    const item = {
+      id: Date.now(),
+      name,
+      brand: document.getElementById('item-brand').value.trim(),
+      price: parseFloat(document.getElementById('item-price').value) || 0,
+      img: document.getElementById('item-img').value.trim(),
+      notes: document.getElementById('item-notes').value.trim(),
+      category: selectedCat,
+      rating: selectedRating,
+      added: new Date().toLocaleDateString()
+    };
+
+    items.unshift(item);
+    save();
+    render();
+    resetForm();
+    showToast(`✓ ${name} added to setup`);
+  }
+
+  function resetForm() {
+    document.getElementById('item-name').value = '';
+    document.getElementById('item-brand').value = '';
+    document.getElementById('item-price').value = '';
+    document.getElementById('item-img').value = '';
+    document.getElementById('item-notes').value = '';
+    document.getElementById('img-preview').classList.remove('visible');
+    selectedRating = 0;
+    setRating(0);
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('view-grid').classList.toggle('active', v === 'grid');
+    document.getElementById('view-list').classList.toggle('active', v === 'list');
+    render();
+  }
+
+  function openDelete(id) {
+    deleteTarget = id;
+    const item = items.find(i => i.id === id);
+    document.getElementById('delete-name').textContent = item?.name || '';
+    document.getElementById('delete-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('delete-modal').classList.remove('open');
+    deleteTarget = null;
+  }
+
+  function confirmDelete() {
+    if (deleteTarget !== null) {
+      const name = items.find(i => i.id === deleteTarget)?.name;
+      items = items.filter(i => i.id !== deleteTarget);
+      save();
+      render();
+      closeModal();
+      showToast(`Removed ${name}`);
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function starsHtml(rating) {
+    return [1,2,3,4,5].map(i =>
+      `<span class="rating-star ${i <= rating ? 'lit' : ''}">★</span>`
+    ).join('');
+  }
+
+  function formatPrice(p) {
+    return p > 0 ? `$${p.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` : 'Free';
+  }
+
+  function render() {
+    const filtered = currentFilter === 'All'
+      ? items
+      : items.filter(i => i.category === currentFilter);
+
+    const container = document.getElementById('items-container');
+    container.className = currentView === 'grid' ? 'items-grid' : 'items-list';
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚙️</div>
+          <div class="empty-title">${currentFilter === 'All' ? 'No items yet' : 'No ' + currentFilter + ' items'}</div>
+          <div class="empty-sub">// add your first item using the form</div>
+        </div>`;
+    } else {
+      if (currentView === 'grid') {
+        container.innerHTML = filtered.map(item => `
+          <div class="item-card">
+            <div class="card-accent-bar"></div>
+            <div class="card-body">
+              <div class="card-category">${ICONS[item.category] || '📦'} ${item.category}</div>
+              ${item.img ? `<img class="card-image" src="${item.img}" alt="${item.name}" onerror="this.style.display='none'" />` : `<div class="card-image-placeholder">${ICONS[item.category] || '📦'}</div>`}
+              <div class="card-name">${item.name}</div>
+              ${item.brand ? `<div class="card-brand">${item.brand}</div>` : ''}
+              ${item.rating ? `<div class="rating-display">${starsHtml(item.rating)}</div>` : ''}
+              ${item.notes ? `<div class="card-notes">${item.notes}</div>` : ''}
+              <div class="card-footer">
+                <span class="card-price ${item.price === 0 ? 'free' : ''}">${formatPrice(item.price)}</span>
+                <div class="card-actions">
+                  <button class="action-btn delete" onclick="openDelete(${item.id})">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>`).join('');
+      } else {
+        container.innerHTML = filtered.map(item => `
+          <div class="item-list-row">
+            <span class="list-icon">${ICONS[item.category] || '📦'}</span>
+            <div class="list-info">
+              <span class="list-name">${item.name}</span>
+              ${item.brand ? `<span class="list-brand">${item.brand}</span>` : ''}
+            </div>
+            <span class="list-cat">${item.category}</span>
+            ${item.rating ? `<div class="rating-display">${starsHtml(item.rating)}</div>` : '<div></div>'}
+            <span class="list-price">${formatPrice(item.price)}</span>
+            <div class="list-actions">
+              <button class="action-btn delete" onclick="openDelete(${item.id})">✕</button>
+            </div>
+          </div>`).join('');
+      }
+    }
+
+    // Update stats
+    const total = items.reduce((s, i) => s + i.price, 0);
+    const cats = new Set(items.map(i => i.category)).size;
+    document.getElementById('total-items').textContent = items.length;
+    document.getElementById('total-cost').textContent = `$${total.toFixed(0)}`;
+    document.getElementById('total-cats').textContent = cats;
+
+    // Total bar
+    const bar = document.getElementById('total-bar');
+    const filteredTotal = filtered.reduce((s, i) => s + i.price, 0);
+    if (filtered.length > 0) {
+      bar.style.display = 'flex';
+      document.getElementById('total-display').textContent = formatPrice(filteredTotal);
+    } else {
+      bar.style.display = 'none';
+    }
+
+    // Category breakdown
+    const breakdown = {};
+    items.forEach(i => { breakdown[i.category] = (breakdown[i.category] || 0) + 1; });
+    const bEl = document.getElementById('cat-breakdown');
+    bEl.innerHTML = Object.entries(breakdown).map(([cat, cnt]) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.75rem;color:#999;">${ICONS[cat] || '📦'} ${cat}</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--accent);">${cnt}</span>
+      </div>`).join('');
+  }
+
+  // Close modal on overlay click
+  document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Initial render
+  render();
+</script>
+</body>
+</html>
